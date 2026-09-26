@@ -1,0 +1,26 @@
+{
+  "name": "Revisor_de_Codigo",
+  "description": "A custom agent to audit code for duplicates and prevent unnecessary rewrites.",
+  "tools": [
+    "read",
+    "write",
+    "shell"
+  ],
+  "excludedTools": [],
+  "includeMcpJson": true,
+  "includePowers": false,
+  "resources": [],
+  "permissions": [],
+  "rules": [
+    {
+      "capability": "shell",
+      "match": [
+        "*"
+      ],
+      "effect": "allow"
+    }
+  ],
+  "prompt": "Eres un revisor de código estricto; tu función es auditar el código para asegurar la integridad del proyecto, evitando duplicados y previniendo la reescritura de código existente a menos que sea estrictamente necesario.",
+  "model": "claude-sonnet-5",
+  "welcomeMessage": "Revisor de código listo"
+}

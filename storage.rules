@@ -1,0 +1,68 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ─── Funciones auxiliares ──────────────────────────────────────────────
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+
+    function isValidImage() {
+      return request.resource.contentType.matches('image/(jpeg|png|webp|gif)')
+        && request.resource.size < 10 * 1024 * 1024; // máximo 10 MB
+    }
+
+    function isValidBillAttachment() {
+      // Acepta imágenes y PDFs para comprobantes de facturas
+      return (request.resource.contentType.matches('image/(jpeg|png|webp|gif)') ||
+              request.resource.contentType == 'application/pdf')
+        && request.resource.size < 20 * 1024 * 1024; // máximo 20 MB
+    }
+
+    // ─── Fotos de propiedades ──────────────────────────────────────────────
+    // Ruta: properties/{propertyId}/photos/{fileName}
+    match /properties/{propertyId}/photos/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidImage();
+      allow delete: if isAuthenticated();
+    }
+
+    // ─── Fotos de habitaciones ─────────────────────────────────────────────
+    // Ruta: properties/{propertyId}/rooms/{roomId}/photos/{fileName}
+    match /properties/{propertyId}/rooms/{roomId}/photos/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidImage();
+      allow delete: if isAuthenticated();
+    }
+
+    // ─── Documentos de facturas ────────────────────────────────────────────
+    // Ruta usada por billsService y la página /bills/new:
+    //   bills/{propertyId}/{timestamp}_{fileName}
+    // Ruta también aceptada para adjuntos organizados por carpeta:
+    //   bills/{propertyId}/attachments/{fileName}
+    match /bills/{propertyId}/{allPaths=**} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isValidBillAttachment();
+      allow delete: if isAuthenticated();
+    }
+
+    // ─── Fotos de perfil ───────────────────────────────────────────────────
+    // Ruta: users/{userId}/avatar/{fileName}
+    match /users/{userId}/avatar/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isOwner(userId) && isValidImage();
+      allow delete: if isAuthenticated() && isOwner(userId);
+    }
+
+    // ─── Denegar cualquier otra ruta ──────────────────────────────────────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

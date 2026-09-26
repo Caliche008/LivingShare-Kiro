@@ -1,0 +1,149 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Funciones auxiliares ──────────────────────────────────────────────
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasRole(role) {
+      return isAuthenticated() && role in getUserData().roles;
+    }
+
+    function getPropertyData(propertyId) {
+      return get(/databases/$(database)/documents/properties/$(propertyId)).data;
+    }
+
+    function isPropertyManager(propertyId) {
+      let property = getPropertyData(propertyId);
+      return isAuthenticated() &&
+        (request.auth.uid == property.ownerId ||
+         request.auth.uid in property.managerIds);
+    }
+
+    function isPropertyResident(propertyId) {
+      // Un residente de la propiedad tiene al menos un share de una factura de esa propiedad.
+      // Para simplificar, cualquier usuario autenticado con rol 'resident' puede leer
+      // las facturas de propiedades donde tenga participaciones. La restricción fina
+      // se hace consultando el billId en las shares.
+      return isAuthenticated() && hasRole('resident');
+    }
+
+    function getBillPropertyId(billId) {
+      return get(/databases/$(database)/documents/bills/$(billId)).data.propertyId;
+    }
+
+    // ─── Usuarios ──────────────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if isAuthenticated() && isOwner(userId);
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAuthenticated() && isOwner(userId)
+        && !('roles' in request.resource.data.diff(resource.data).affectedKeys());
+      allow delete: if false;
+    }
+
+    // ─── Cuestionarios ─────────────────────────────────────────────────────
+    match /questionnaires/{userId} {
+      allow read: if isAuthenticated() && isOwner(userId);
+      allow create, update: if isAuthenticated() && isOwner(userId);
+      allow delete: if false;
+    }
+
+    // ─── Propiedades ───────────────────────────────────────────────────────
+    match /properties/{propertyId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && hasRole('owner');
+      allow update: if isPropertyManager(propertyId);
+      allow delete: if false;
+
+      // ─── Habitaciones (subcolección) ─────────────────────────────────
+      match /rooms/{roomId} {
+        // Habitaciones publicadas son legibles sin autenticación (página pública).
+        // Cualquier otro estado solo es legible por usuarios autenticados.
+        allow read: if resource.data.status == 'published'
+          || isAuthenticated();
+        allow create, update: if isPropertyManager(propertyId);
+        allow delete: if false;
+      }
+    }
+
+    // ─── Matches ───────────────────────────────────────────────────────────
+    match /matches/{matchId} {
+      allow read: if isAuthenticated() &&
+        resource.data.userId == request.auth.uid;
+      allow create, update, delete: if false;
+    }
+
+    // ─── Facturas ──────────────────────────────────────────────────────────
+    match /bills/{billId} {
+      // Lectura: administradores/propietarios de la propiedad
+      // O residentes autenticados (acceso fino controlado por shares)
+      allow read: if isAuthenticated() &&
+        (isPropertyManager(resource.data.propertyId) ||
+         isPropertyResident(resource.data.propertyId));
+
+      // Creación: solo administradores/propietarios de la propiedad
+      allow create: if isAuthenticated() &&
+        isPropertyManager(request.resource.data.propertyId);
+
+      // Actualización: solo administradores — los residentes no pueden modificar facturas
+      allow update: if isAuthenticated() &&
+        isPropertyManager(resource.data.propertyId);
+
+      allow delete: if false;
+
+      // ─── Participaciones (subcolección) ──────────────────────────────
+      match /shares/{shareId} {
+        // Residentes ven solo su propia participación
+        // Administradores/propietarios ven todas las del bill
+        allow read: if isAuthenticated() &&
+          (resource.data.residentId == request.auth.uid ||
+           isPropertyManager(getBillPropertyId(billId)));
+
+        // Solo Cloud Functions crean/actualizan participaciones
+        allow create, update, delete: if false;
+      }
+    }
+
+    // ─── Pagos ─────────────────────────────────────────────────────────────
+    match /payments/{paymentId} {
+      // El residente ve sus propios pagos
+      allow read: if isAuthenticated() &&
+        resource.data.userId == request.auth.uid;
+
+      // Propietarios/admins pueden ver pagos para conciliación
+      // (requiere conocer el billId — la función getBillPropertyId no aplica aquí
+      //  por lo que este permiso se gestiona desde la Cloud Function de consulta)
+      allow create, update, delete: if false;
+    }
+
+    // ─── Auditoría ─────────────────────────────────────────────────────────
+    match /auditLogs/{logId} {
+      allow read: if hasRole('owner') || hasRole('admin');
+      allow create, update, delete: if false;
+    }
+
+    // ─── Eventos de Stripe (idempotencia del webhook) ─────────────────────
+    // Solo Cloud Functions leen/escriben esta colección.
+    // Nunca accesible desde el cliente.
+    match /_stripeEvents/{eventId} {
+      allow read, write: if false;
+    }
+
+    // ─── Health check interno ──────────────────────────────────────────────
+    match /_health/{docId} {
+      allow read, write: if false;
+    }
+  }
+}
