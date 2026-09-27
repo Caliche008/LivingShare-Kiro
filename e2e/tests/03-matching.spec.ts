@@ -182,7 +182,6 @@ test.describe("Flujo de matching / compatibilidad", () => {
   });
 
   test("la página pública de habitación es accesible sin login", async ({
-    page,
     context,
   }) => {
     // Crear una nueva página sin sesión para simular un visitante anónimo

@@ -1,4 +1,5 @@
 import * as admin from "firebase-admin";
+import { setGlobalOptions } from "firebase-functions/v2/options";
 import {
   onRequest,
   onCall,
@@ -6,6 +7,14 @@ import {
 } from "firebase-functions/v2/https";
 import { beforeUserCreated, beforeUserSignedIn } from "firebase-functions/v2/identity";
 import { logger } from "firebase-functions";
+
+// ─── Límite global de instancias (control de costos) ─────────────────────────
+// Acota cuántas instancias concurrentes puede lanzar CUALQUIER función de este
+// proyecto. Es el freno físico más importante contra un gasto descontrolado en
+// el plan Blaze: aunque llegue un pico o un abuso, el número de instancias
+// facturables queda limitado. Con pocos usuarios este techo nunca se alcanza.
+// Ajustar al alza cuando el tráfico real lo justifique.
+setGlobalOptions({ maxInstances: 3 });
 
 // ─── Inicializar Firebase Admin SDK ──────────────────────────────────────────
 if (!admin.apps.length) {

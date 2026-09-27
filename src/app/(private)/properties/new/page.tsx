@@ -1,7 +1,6 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ui/ProtectedRoute";
 import PropertyForm from "@/components/properties/PropertyForm";
@@ -24,7 +23,7 @@ export default function NewPropertyPage() {
       <main className="min-h-screen bg-gray-50">
         <div className="bg-white shadow-sm">
           <div className="mx-auto max-w-2xl px-4 py-4">
-            <a href="/properties" className="text-sm text-indigo-600 hover:underline">← Propiedades</a>
+            <Link href="/properties" className="text-sm text-indigo-600 hover:underline">← Propiedades</Link>
             <h1 className="text-xl font-bold text-gray-900">Nueva propiedad</h1>
           </div>
         </div>

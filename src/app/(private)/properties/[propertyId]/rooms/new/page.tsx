@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useParams, useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ui/ProtectedRoute";
 import RoomForm from "@/components/rooms/RoomForm";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { calculateBillSplit, formatCents, BillSplitError } from "@/lib/domain/billSplit";
 import type { SplitRule, ResidentSplitInput } from "@/types";
 
@@ -42,14 +42,14 @@ export default function BillSplitPreview({
   );
   const [totalDays, setTotalDays] = useState(30);
   const [excluded, setExcluded] = useState<Record<string, boolean>>({});
-  const [preview, setPreview] = useState<ReturnType<typeof calculateBillSplit> | null>(null);
-  const [previewError, setPreviewError] = useState("");
   const [confirming, setConfirming] = useState(false);
   const [confirmError, setConfirmError] = useState("");
 
-  // Recalcular vista previa en cada cambio
-  useEffect(() => {
-    setPreviewError("");
+  // Vista previa derivada: se recalcula durante el render, no en un effect.
+  const { preview, previewError } = useMemo<{
+    preview: ReturnType<typeof calculateBillSplit> | null;
+    previewError: string;
+  }>(() => {
     try {
       const inputs: ResidentSplitInput[] = residents.map((r) => ({
         residentId: r.residentId,
@@ -58,13 +58,12 @@ export default function BillSplitPreview({
         daysOccupied: days[r.residentId] ?? 0,
         excluded: excluded[r.residentId] ?? false,
       }));
-      const result = calculateBillSplit(totalAmountCents, rule, inputs, totalDays);
-      setPreview(result);
+      return { preview: calculateBillSplit(totalAmountCents, rule, inputs, totalDays), previewError: "" };
     } catch (err) {
       if (err instanceof BillSplitError) {
-        setPreviewError(err.message);
+        return { preview: null, previewError: err.message };
       }
-      setPreview(null);
+      return { preview: null, previewError: "" };
     }
   }, [rule, percentages, days, totalDays, excluded, totalAmountCents, residents]);
 

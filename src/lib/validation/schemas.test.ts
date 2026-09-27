@@ -301,7 +301,6 @@ describe("billSchema", () => {
   });
 
   test("acepta sin provider (opcional)", () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { provider: _provider, ...noProvider } = valid;
     expect(billSchema.safeParse(noProvider).success).toBe(true);
   });

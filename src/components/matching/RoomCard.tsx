@@ -15,16 +15,6 @@ interface RoomCardProps {
   showCompatibility?: boolean;
 }
 
-/** Format cents as Mexican pesos (MXN) */
-function formatMXN(cents: number): string {
-  return new Intl.NumberFormat('es-MX', {
-    style: 'currency',
-    currency: 'MXN',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(cents / 100);
-}
-
 /** Pick the top N factors by weight × similarity (ignoring warning factor) */
 function topFactors(factors: MatchFactor[], n = 3): MatchFactor[] {
   return [...factors]

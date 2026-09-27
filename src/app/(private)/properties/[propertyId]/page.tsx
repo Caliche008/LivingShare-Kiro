@@ -1,8 +1,7 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ui/ProtectedRoute";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
@@ -42,6 +41,8 @@ export default function PropertyDetailPage() {
     }
   }, [propertyId]);
 
+  // Carga inicial de datos: setState dentro del fetch es intencional.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
   return (
@@ -50,7 +51,7 @@ export default function PropertyDetailPage() {
         <div className="bg-white shadow-sm">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4">
             <div>
-              <a href="/properties" className="text-sm text-indigo-600 hover:underline">← Propiedades</a>
+              <Link href="/properties" className="text-sm text-indigo-600 hover:underline">← Propiedades</Link>
               <h1 className="text-xl font-bold text-gray-900">
                 {property?.name ?? "Propiedad"}
               </h1>

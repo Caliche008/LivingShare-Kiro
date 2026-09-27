@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ui/ProtectedRoute";
@@ -59,6 +57,8 @@ export default function BillsPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const pid = params.get("propertyId") ?? "";
+    // Lectura de query param al montar: setState intencional.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPropertyId(pid);
     if (pid) {
       load(pid);

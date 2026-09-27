@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ui/ProtectedRoute";
@@ -34,6 +32,8 @@ export default function PropertiesPage() {
     }
   }, [user]);
 
+  // Carga inicial de datos: setState dentro del fetch es intencional.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
   return (

@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useAuth } from "@/lib/firebase/AuthContext";
 import DashboardSummary from "@/components/ui/DashboardSummary";
 

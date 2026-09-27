@@ -16,6 +16,25 @@ export const IS_CONFIGURED = Boolean(
   firebaseConfig.apiKey && firebaseConfig.projectId
 );
 
+/**
+ * Indica si las Cloud Functions están desplegadas y disponibles.
+ *
+ * Cloud Functions requieren el plan Blaze de Firebase (con tarjeta). Mientras
+ * el proyecto corre en el plan gratuito Spark, esta bandera se deja en `false`
+ * y las acciones que dependen de Functions (recalcular matching, calcular
+ * reparto de facturas y crear sesión de pago) muestran un aviso en lugar de
+ * fallar.
+ *
+ * Para activarlas tras desplegar las Functions en Blaze, definir en el entorno:
+ *   NEXT_PUBLIC_FUNCTIONS_ENABLED=true
+ */
+export const FUNCTIONS_ENABLED =
+  process.env.NEXT_PUBLIC_FUNCTIONS_ENABLED === "true";
+
+/** Mensaje estándar cuando una acción requiere Cloud Functions no desplegadas. */
+export const FUNCTIONS_DISABLED_MESSAGE =
+  "Esta función estará disponible cuando se despliegue el backend. Por ahora está deshabilitada en esta versión de demostración.";
+
 // ─── Lazy initialization ──────────────────────────────────────────────────────
 // Los servicios se inicializan solo cuando se llaman por primera vez,
 // lo que permite que Next.js compile el bundle sin ejecutar Firebase.

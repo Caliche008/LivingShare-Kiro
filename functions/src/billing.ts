@@ -483,6 +483,9 @@ export const stripeWebhook = onRequest(
     secrets: [STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET],
     // rawBody es necesario para verificar la firma HMAC de Stripe
     invoker: "public",
+    // Un poco más de holgura que el global (3): Stripe puede reintentar en
+    // ráfaga y no queremos rechazar eventos por saturación. Sigue acotado.
+    maxInstances: 5,
   },
   async (req, res) => {
     const sig = req.headers["stripe-signature"];

@@ -131,7 +131,7 @@ describe("billsService.createBill", () => {
   test("llama a addDoc con los campos correctos incluyendo totalAmountCents", async () => {
     mockAddDoc.mockResolvedValueOnce({ id: BILL_ID });
 
-    const result = await createBill(PROPERTY_ID, ACTOR_ID, BILL_INPUT);
+    await createBill(PROPERTY_ID, ACTOR_ID, BILL_INPUT);
 
     expect(mockAddDoc).toHaveBeenCalled();
     const callArgs = mockAddDoc.mock.calls[0][1] as Record<string, unknown>;
@@ -386,7 +386,7 @@ describe("Invariante de reparto: suma de participaciones == total", () => {
   test("createBill no almacena centavos incorrectos", async () => {
     mockAddDoc.mockResolvedValue({ id: BILL_ID });
 
-    const bill = await createBill(PROPERTY_ID, ACTOR_ID, {
+    await createBill(PROPERTY_ID, ACTOR_ID, {
       ...BILL_INPUT,
       totalAmountCents: 99999, // número impar que fuerza redondeo
     });

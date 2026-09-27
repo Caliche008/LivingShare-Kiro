@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { getFunctions, httpsCallable } from "firebase/functions";
+import { FUNCTIONS_ENABLED, FUNCTIONS_DISABLED_MESSAGE } from "@/lib/firebase/config";
 import { formatCents } from "@/lib/domain/billSplit";
 import type { BillShare, Payment, ShareStatus } from "@/types";
 
@@ -53,6 +54,10 @@ export default function ShareCard({
 
   async function handlePay() {
     setPayError("");
+    if (!FUNCTIONS_ENABLED) {
+      setPayError(FUNCTIONS_DISABLED_MESSAGE);
+      return;
+    }
     setPaying(true);
 
     try {

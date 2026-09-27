@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ui/ProtectedRoute";
@@ -15,6 +13,8 @@ export default function PaymentSuccessPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const sid = params.get("session_id");
+    // Lectura de query param al montar: setState intencional.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSessionId(sid);
 
     // Dar tiempo al webhook de Stripe para procesar el evento (≈2s)

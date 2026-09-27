@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useState, useEffect, useCallback } from "react";
 import ProtectedRoute from "@/components/ui/ProtectedRoute";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
@@ -38,6 +36,8 @@ export default function RoomsSearchPage() {
     }
   }, [minPrice, maxPrice, availableFrom]);
 
+  // Carga inicial de datos: setState dentro del fetch es intencional.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
   function clearFilters() {

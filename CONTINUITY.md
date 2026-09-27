@@ -24,8 +24,8 @@ Ejecutar esto primero para confirmar que el entorno está sano:
 ```bash
 # Desde la raíz del proyecto
 npm test            # debe dar 163 pruebas, 0 fallidas (6 suites)
-npm run lint        # 0 errores en archivos propios (hay warnings preexistentes en otros)
-npm run build       # TypeScript compila sin errores; prerenderizado falla por bug Next.js 16.3.6 (#84994)
+npm run lint        # 0 errores, 0 warnings (limpio) — corregido en sesión 7
+npm run build       # compila y genera las 21 rutas sin errores (exit 0)
 
 # Desde /functions
 cd functions
@@ -153,6 +153,9 @@ firestore.indexes.json   → 17 índices (requiere índice {userId,type,createdA
 | Sesión 5 — P7 | Dependencia @stripe/stripe-js + fix API deprecada | ✅ 100% |
 | Sesión 5 — Extra | Pruebas de schemas Zod (63 nuevas) | ✅ 100% |
 | Sesión 6 — E2E | Tests E2E con Playwright (53 tests en 5 flujos) | ✅ 100% |
+| Sesión 7 — Lint | Saneamiento: 50 errores de lint → 0; build pasa; limpieza de basura | ✅ 100% |
+| Sesión 8 — Deploy | Vercel + Firebase Spark sin tarjeta; degradación de Functions | ✅ 100% |
+| Sesión 9 — Costos | `maxInstances` en Functions (global 3, webhook 5) | ✅ 100% |
 
 **Cobertura de pruebas actual:** 214 pruebas unitarias (0 fallidas) + 53 tests E2E.
 
@@ -241,12 +244,11 @@ Desplegar con: `firebase deploy --only firestore:indexes`
 (removido en v4+) de `ShareCard.tsx`. Se agregó `src/app/global-error.tsx`
 requerido por Next.js 16.
 
-**Estado del build:** TypeScript compila sin errores (`✓ Finished TypeScript`).
-El build falla en la fase de prerenderizado estático de `/_global-error` —
-es un **bug confirmado de Next.js 16.3.6** (issue #84994 en vercel/next.js).
-Afecta a la generación estática local únicamente; no impide el despliegue en
-Vercel ni en Firebase Hosting, donde las páginas Client Component se tratan
-como dinámicas. Sin workaround de usuario disponible hasta que Next.js lo parchee.
+**Estado del build (actualizado sesión 7):** `npm run build` **pasa completo**
+(exit 0) y genera las 21 rutas. El bug de prerenderizado de Next.js 16.3.6 ya
+no bloquea. Como consecuencia se retiró el workaround `export const dynamic =
+"force-dynamic"` que estaba en 21 páginas cliente (ya no era necesario y
+causaba errores de `react-hooks/rules-of-hooks`).
 
 ---
 
@@ -305,6 +307,115 @@ npx playwright install chromium
 # o todos los navegadores:
 npx playwright install
 ```
+
+---
+
+### Sesión 7 — Saneamiento de lint ✅ COMPLETADO
+
+`npm run lint` pasó de **50 errores + 14 warnings** a **0 problemas**. Cambios:
+
+- `eslint.config.mjs`: se ignoran `functions/lib/**`, `functions/**/*.js` y
+  `e2e/playwright-report/**`; se añade `argsIgnorePattern`/`varsIgnorePattern`
+  = `^_` para `no-unused-vars`; y se desactiva `react-hooks/rules-of-hooks` en
+  `e2e/**` (el `use` de Playwright no es el hook `use` de React — falso positivo).
+- Retiradas las 21 líneas `export const dynamic = "force-dynamic"` (workaround
+  obsoleto del bug de prerender ya resuelto).
+- `BillSplitPreview.tsx`: la vista previa del reparto ahora se deriva con
+  `useMemo` en lugar de `setState` dentro de un `useEffect`.
+- Los 11 effects de carga de datos / lectura de query params llevan un
+  `eslint-disable-next-line react-hooks/set-state-in-effect` justificado.
+- `<a href="/properties">` → `<Link>` en `properties/new` y `properties/[propertyId]`.
+- `matches/page.tsx`: `window.location.href` → `useRouter().push()`.
+- Limpieza de imports/vars sin usar y de archivos basura
+  (`lint-fix-marker.ts`, `functions/*.txt`).
+
+Verificado: lint 0/0, build exit 0 (21 rutas), 163 tests frontend + 51 functions.
+
+---
+
+### Sesión 8 — Despliegue en Vercel + Firebase Spark (sin tarjeta) ✅ COMPLETADO
+
+Objetivo: dejar la app **online en Vercel gratis y sin tarjeta**, usando el plan
+**Spark** de Firebase (Auth + Firestore + Storage). Las Cloud Functions requieren
+Blaze (con tarjeta), así que las 3 acciones que dependen de ellas se **degradan
+con gracia** (muestran un aviso) en vez de romper. `functions/` no se tocó.
+
+**Bandera de control (`src/lib/firebase/config.ts`):**
+- `FUNCTIONS_ENABLED` lee `NEXT_PUBLIC_FUNCTIONS_ENABLED` (default `false`).
+- `FUNCTIONS_DISABLED_MESSAGE` es el aviso mostrado al usuario.
+
+**Acciones degradadas cuando `FUNCTIONS_ENABLED=false`:**
+| Acción | Archivo | Comportamiento sin Functions |
+|---|---|---|
+| Recalcular matching | `matches/page.tsx` (`handleRecalculate`) | muestra aviso en `recalcMsg` |
+| Calcular reparto | `bills/[billId]/page.tsx` (`handleConfirmSplit`) | `BillSplitPreview` muestra el aviso |
+| Pagar participación | `ShareCard.tsx` (`handlePay`) | muestra aviso en `payError` |
+
+**Lo que SÍ funciona en Spark (sin tarjeta):** registro, login, recuperar
+contraseña, cuestionario, propiedades, habitaciones (crear/listar/público),
+perfil, notificaciones in-app, dashboard. El registro NO depende de Functions
+(`registerUser` crea el doc de usuario con `setDoc` desde el cliente).
+
+---
+
+#### Pasos para desplegar (hoy, sin tarjeta)
+
+**1. Firebase (plan Spark, gratis):**
+1. Crear proyecto en https://console.firebase.google.com (sin tarjeta).
+2. Activar: Authentication (Email/Password), Firestore Database, Storage.
+3. Copiar las credenciales públicas de Configuración → Tus apps.
+
+**2. Reglas e índices de Firestore/Storage** (Spark permite desplegarlos):
+```bash
+firebase login
+firebase use --add            # elige tu proyecto
+firebase deploy --only firestore:rules,firestore:indexes,storage
+```
+
+**3. Frontend en Vercel:**
+1. Subir el repo a GitHub y en https://vercel.com → New Project → importar repo.
+   Framework Next.js se autodetecta. Node 22 se toma de `.node-version`.
+2. En Settings → Environment Variables, agregar (Production + Preview):
+   ```
+   NEXT_PUBLIC_FIREBASE_API_KEY
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+   NEXT_PUBLIC_FIREBASE_APP_ID
+   NEXT_PUBLIC_FUNCTIONS_ENABLED=false      # ← clave: Spark sin Functions
+   ```
+   (`NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` no hace falta mientras Functions esté off.)
+3. Deploy. Vercel entrega una URL `*.vercel.app`.
+
+**4. Autorizar el dominio en Firebase Auth:**
+Console → Authentication → Settings → Authorized domains → agregar el dominio de
+Vercel. Sin esto, el login falla en producción.
+
+---
+
+#### Reactivar Functions cuando llegue inversión (plan Blaze)
+
+Nada del frontend cambia salvo una variable. Pasos:
+1. Upgrade del proyecto a **Blaze** (agregar tarjeta en Google Cloud Billing).
+2. Blindaje de costos antes de nada:
+   - `maxInstances` **ya configurado en código** (sesión 9): global de 3 vía
+     `setGlobalOptions` en `functions/src/index.ts`; el `stripeWebhook` usa 5
+     para absorber reintentos de Stripe. Ajustar al alza cuando el tráfico real
+     lo justifique.
+   - Presupuesto con alertas ($1/$5) en Cloud Billing.
+   - Activar App Check.
+3. Desplegar backend:
+   ```bash
+   firebase functions:secrets:set STRIPE_SECRET_KEY
+   firebase functions:secrets:set STRIPE_WEBHOOK_SECRET
+   cd functions && npm install && npm run build && cd ..
+   firebase deploy --only functions
+   ```
+4. Configurar el webhook de Stripe con la URL de `stripeWebhook` (ver P9).
+5. En Vercel, cambiar `NEXT_PUBLIC_FUNCTIONS_ENABLED=true` (y agregar
+   `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`) y redeploy. Matching, split y pagos
+   quedan activos sin tocar una línea de código.
 
 ---
 

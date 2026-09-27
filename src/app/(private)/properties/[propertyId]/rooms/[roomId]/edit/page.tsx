@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/ui/ProtectedRoute";
@@ -55,6 +53,8 @@ export default function EditRoomPage() {
     }
   }, [propertyId, roomId]);
 
+  // Carga inicial de datos: setState dentro del fetch es intencional.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
   async function handleStatusChange(newStatus: RoomStatus) {

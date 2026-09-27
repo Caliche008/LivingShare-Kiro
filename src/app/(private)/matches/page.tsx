@@ -1,21 +1,20 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { collection, query, where, orderBy, limit, getDocs } from "firebase/firestore";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import ProtectedRoute from "@/components/ui/ProtectedRoute";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import EmptyState from "@/components/ui/EmptyState";
 import ErrorMessage from "@/components/ui/ErrorMessage";
-import RoomCard from "@/components/rooms/RoomCard";
 import { useAuth } from "@/lib/firebase/AuthContext";
-import { db } from "@/lib/firebase/config";
+import { db, FUNCTIONS_ENABLED, FUNCTIONS_DISABLED_MESSAGE } from "@/lib/firebase/config";
 import { getCompatibilityLabel } from "@/lib/domain/matching";
 import type { Match } from "@/types";
 
 export default function MatchesPage() {
+  const router = useRouter();
   const { user, profile } = useAuth();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,10 +42,16 @@ export default function MatchesPage() {
     }
   }, [user]);
 
+  // Carga inicial de datos: setState dentro del fetch es intencional.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, [load]);
 
   async function handleRecalculate() {
     if (!user) return;
+    if (!FUNCTIONS_ENABLED) {
+      setRecalcMsg(`ℹ️ ${FUNCTIONS_DISABLED_MESSAGE}`);
+      return;
+    }
     setRecalculating(true);
     setRecalcMsg("");
     try {
@@ -129,7 +134,7 @@ export default function MatchesPage() {
                   : "Completa tu cuestionario para comenzar."
               }
               actionLabel={questionnaireSubmitted ? "Calcular compatibilidad" : "Ir al cuestionario"}
-              onAction={questionnaireSubmitted ? handleRecalculate : () => { window.location.href = "/questionnaire"; }}
+              onAction={questionnaireSubmitted ? handleRecalculate : () => router.push("/questionnaire")}
             />
           ) : (
             <div className="space-y-4">

@@ -55,7 +55,6 @@ import type { Timestamp } from "firebase/firestore";
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
 const USER_ID = "user-001";
-const TS = "2026-01-01T00:00:00Z" as unknown as Timestamp;
 
 function makeNotif(
   id: string,

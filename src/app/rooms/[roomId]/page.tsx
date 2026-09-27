@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 /**
  * Página pública de habitación — /rooms/[roomId]
  *

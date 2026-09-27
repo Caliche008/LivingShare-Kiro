@@ -19,7 +19,7 @@
  */
 
 import { test, expect } from "../helpers/fixtures";
-import { FIREBASE_TIMEOUT, ROUTES } from "../helpers/test-data";
+import { FIREBASE_TIMEOUT } from "../helpers/test-data";
 
 test.describe("Flujo de facturas", () => {
   test("la página de facturas es accesible", async ({ billsPage, page }) => {
@@ -139,14 +139,8 @@ test.describe("Flujo de propiedades → facturas", () => {
     // Debe redirigir al detalle de la propiedad o a la lista
     await expect(page).toHaveURL(/\/properties/, { timeout: FIREBASE_TIMEOUT });
 
-    // La propiedad debe aparecer en la página destino
-    const nameVisible = await page
-      .getByText(propertyName)
-      .isVisible()
-      .catch(() => false);
-
-    // Si no está visible puede ser porque redirigió al listado donde aún no cargó
-    // Solo verificamos que la URL es correcta
+    // Puede redirigir al detalle de la propiedad o al listado donde aún no cargó,
+    // por lo que solo verificamos que la URL es correcta.
     expect(page.url()).toContain("/properties");
   });
 

@@ -96,7 +96,7 @@ async function handleCheckoutCompleted(
   shareId: string,
   residentId: string,
   paymentIntentId: string,
-  amountTotal: number
+  _amountTotal: number
 ) {
   // Actualizar payment → paid
   const payment = db.getPaymentBySessionId(sessionId);

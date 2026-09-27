@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getFunctions, httpsCallable } from "firebase/functions";
@@ -11,12 +9,12 @@ import ErrorMessage from "@/components/ui/ErrorMessage";
 import BillSplitPreview from "@/components/bills/BillSplitPreview";
 import ShareCard from "@/components/bills/ShareCard";
 import { useAuth } from "@/lib/firebase/AuthContext";
+import { FUNCTIONS_ENABLED, FUNCTIONS_DISABLED_MESSAGE } from "@/lib/firebase/config";
 import { getBill } from "@/lib/firebase/billsService";
 import {
   getSharesByBill,
   getPaymentByShare,
 } from "@/lib/firebase/billSplitService";
-import { getPropertiesByOwner } from "@/lib/firebase/propertiesService";
 import { getRoomsByProperty } from "@/lib/firebase/roomsService";
 import { formatCents } from "@/lib/domain/billSplit";
 import type { Bill, BillShare, Payment, SplitRule, ResidentSplitInput } from "@/types";
@@ -80,15 +78,13 @@ export default function BillDetailPage() {
         const residentSet = new Set<string>();
         const residentOptions: ResidentOption[] = [];
 
-        for (const room of rooms) {
-          // Incluimos al usuario actual como ejemplo de residente
-          if (user && !residentSet.has(user.uid)) {
-            residentSet.add(user.uid);
-            residentOptions.push({
-              residentId: user.uid,
-              displayName: profile?.displayName ?? user.email ?? user.uid,
-            });
-          }
+        // Incluimos al usuario actual como ejemplo de residente si hay habitaciones
+        if (rooms.length > 0 && user && !residentSet.has(user.uid)) {
+          residentSet.add(user.uid);
+          residentOptions.push({
+            residentId: user.uid,
+            displayName: profile?.displayName ?? user.email ?? user.uid,
+          });
         }
 
         // Si no hay habitaciones, al menos incluir al usuario actual
@@ -117,6 +113,8 @@ export default function BillDetailPage() {
   }, [billId, user, profile]);
 
   useEffect(() => {
+    // Carga inicial de datos: setState dentro del fetch es intencional.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [billId]);
@@ -127,6 +125,10 @@ export default function BillDetailPage() {
     totalDays?: number
   ) {
     if (!bill) return;
+    if (!FUNCTIONS_ENABLED) {
+      // BillSplitPreview muestra este mensaje en su estado de error de confirmación.
+      throw new Error(FUNCTIONS_DISABLED_MESSAGE);
+    }
     setSplitLoading(true);
     try {
       const fns = getFunctions();
