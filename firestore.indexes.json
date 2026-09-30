@@ -45,13 +45,6 @@
       "collectionGroup": "shares",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "amountCents", "order": "DESCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "shares",
-      "queryScope": "COLLECTION",
-      "fields": [
         { "fieldPath": "residentId", "order": "ASCENDING" },
         { "fieldPath": "status", "order": "ASCENDING" }
       ]
@@ -85,29 +78,8 @@
       "collectionGroup": "payments",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "billShareId", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "payments",
-      "queryScope": "COLLECTION",
-      "fields": [
         { "fieldPath": "billShareId", "order": "ASCENDING" },
         { "fieldPath": "status", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "payments",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "providerSessionId", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "payments",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "providerPaymentId", "order": "ASCENDING" }
       ]
     },
     {
