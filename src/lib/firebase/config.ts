@@ -1,7 +1,7 @@
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
-import { type Auth } from "firebase/auth";
-import { type Firestore } from "firebase/firestore";
-import { type FirebaseStorage } from "firebase/storage";
+import { getAuth, type Auth } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
+import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "",
@@ -35,91 +35,40 @@ export const FUNCTIONS_ENABLED =
 export const FUNCTIONS_DISABLED_MESSAGE =
   "Esta función estará disponible cuando se despliegue el backend. Por ahora está deshabilitada en esta versión de demostración.";
 
-// ─── Lazy initialization ──────────────────────────────────────────────────────
-// Los servicios se inicializan solo cuando se llaman por primera vez,
-// lo que permite que Next.js compile el bundle sin ejecutar Firebase.
+// ─── Inicialización directa ───────────────────────────────────────────────────
+// Se exportan instancias REALES de los servicios Firebase, no Proxys.
+// Un Proxy no es `instanceof FirebaseFirestore`, y el SDK rechaza eso en
+// producción con: "Expected first argument to collection() to be a
+// CollectionReference, a DocumentReference or FirebaseFirestore".
+//
+// La inicialización solo ocurre si la configuración es válida. Durante el
+// prerenderizado estático (build) de páginas que no usan Firebase —p. ej.
+// /_not-found— las variables pueden no estar presentes; en ese caso no se
+// inicializa y se evita el error `auth/invalid-api-key`.
+// `getApps()` evita reinicializar la app en recargas o HMR.
+const firebaseApp: FirebaseApp | null = IS_CONFIGURED
+  ? getApps().length
+    ? getApp()
+    : initializeApp(firebaseConfig)
+  : null;
 
-let _app: FirebaseApp | undefined;
-let _auth: Auth | undefined;
-let _db: Firestore | undefined;
-let _storage: FirebaseStorage | undefined;
+export const auth: Auth = firebaseApp ? getAuth(firebaseApp) : ({} as Auth);
+export const db: Firestore = firebaseApp ? getFirestore(firebaseApp) : ({} as Firestore);
+export const storage: FirebaseStorage = firebaseApp
+  ? getStorage(firebaseApp)
+  : ({} as FirebaseStorage);
 
-function getApp_(): FirebaseApp {
-  if (_app) return _app;
-  // ── Diagnóstico temporal: verificar qué configuración llega al navegador ──
-  // Muestra qué campos están presentes/vacíos sin exponer los valores completos.
-  // TODO: eliminar tras confirmar el despliegue.
-  if (typeof window !== "undefined") {
-    // eslint-disable-next-line no-console
-    console.log("[Firebase config check]", {
-      apiKey: firebaseConfig.apiKey ? `ok(${firebaseConfig.apiKey.length} chars)` : "VACIO",
-      authDomain: firebaseConfig.authDomain || "VACIO",
-      projectId: firebaseConfig.projectId || "VACIO",
-      storageBucket: firebaseConfig.storageBucket || "VACIO",
-      messagingSenderId: firebaseConfig.messagingSenderId ? "ok" : "VACIO",
-      appId: firebaseConfig.appId ? "ok" : "VACIO",
-    });
-  }
-  _app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-  return _app;
-}
-
+// Accesores mantenidos por compatibilidad con el código existente.
 export function getFirebaseAuth(): Auth {
-  if (!_auth) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { getAuth } = require("firebase/auth");
-    _auth = getAuth(getApp_()) as Auth;
-  }
-  return _auth!;
+  return auth;
 }
 
 export function getFirebaseDb(): Firestore {
-  if (!_db) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { getFirestore } = require("firebase/firestore");
-    _db = getFirestore(getApp_()) as Firestore;
-  }
-  return _db!;
+  return db;
 }
 
 export function getFirebaseStorage(): FirebaseStorage {
-  if (!_storage) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { getStorage } = require("firebase/storage");
-    _storage = getStorage(getApp_()) as FirebaseStorage;
-  }
-  return _storage!;
+  return storage;
 }
-
-// ─── Proxy objects para compatibilidad con código existente ─────────────────
-// Estos objetos delegan al singleton lazy cuando se accede a sus propiedades.
-
-export const auth = new Proxy({} as Auth, {
-  get(_target, prop) {
-    const a = getFirebaseAuth();
-    return (a as unknown as Record<string | symbol, unknown>)[prop];
-  },
-});
-
-export const db = new Proxy({} as Firestore, {
-  get(_target, prop) {
-    const d = getFirebaseDb();
-    return (d as unknown as Record<string | symbol, unknown>)[prop];
-  },
-});
-
-export const storage = new Proxy({} as FirebaseStorage, {
-  get(_target, prop) {
-    const s = getFirebaseStorage();
-    return (s as unknown as Record<string | symbol, unknown>)[prop];
-  },
-});
-
-const firebaseApp = new Proxy({} as FirebaseApp, {
-  get(_target, prop) {
-    const a = getApp_();
-    return (a as unknown as Record<string | symbol, unknown>)[prop];
-  },
-});
 
 export default firebaseApp;
