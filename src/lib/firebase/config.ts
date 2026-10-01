@@ -46,6 +46,20 @@ let _storage: FirebaseStorage | undefined;
 
 function getApp_(): FirebaseApp {
   if (_app) return _app;
+  // ── Diagnóstico temporal: verificar qué configuración llega al navegador ──
+  // Muestra qué campos están presentes/vacíos sin exponer los valores completos.
+  // TODO: eliminar tras confirmar el despliegue.
+  if (typeof window !== "undefined") {
+    // eslint-disable-next-line no-console
+    console.log("[Firebase config check]", {
+      apiKey: firebaseConfig.apiKey ? `ok(${firebaseConfig.apiKey.length} chars)` : "VACIO",
+      authDomain: firebaseConfig.authDomain || "VACIO",
+      projectId: firebaseConfig.projectId || "VACIO",
+      storageBucket: firebaseConfig.storageBucket || "VACIO",
+      messagingSenderId: firebaseConfig.messagingSenderId ? "ok" : "VACIO",
+      appId: firebaseConfig.appId ? "ok" : "VACIO",
+    });
+  }
   _app = getApps().length ? getApp() : initializeApp(firebaseConfig);
   return _app;
 }
