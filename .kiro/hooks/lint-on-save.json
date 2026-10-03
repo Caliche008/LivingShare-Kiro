@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Lint al guardar",
+      "trigger": "PostFileSave",
+      "description": "Ejecuta ESLint cuando se guarda un archivo .ts o .tsx dentro de src/, para avisar de problemas de calidad sin bloquear ni modificar nada.",
+      "matcher": "src[\\\\/].*\\.(ts|tsx)$",
+      "action": {
+        "type": "command",
+        "command": "npx eslint --max-warnings=0",
+        "timeout": 120
+      }
+    }
+  ]
+}

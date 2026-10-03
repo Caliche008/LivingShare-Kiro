@@ -1,0 +1,21 @@
+{
+  "name": "livingshare-coliving",
+  "version": "1.0.0",
+  "description": "Reglas de arquitectura, seguridad y dominio para construir aplicaciones de co-living (vivienda compartida): matching de compatibilidad, gestion de propiedades, reparto de facturas en centavos y pagos idempotentes.",
+  "author": {
+    "name": "Caliche008"
+  },
+  "keywords": [
+    "coliving",
+    "roommates",
+    "matching",
+    "bill-split",
+    "facturas",
+    "stripe",
+    "firebase",
+    "nextjs",
+    "zod"
+  ],
+  "repository": "https://github.com/Caliche008/livingshare-power",
+  "license": "MIT"
+}
