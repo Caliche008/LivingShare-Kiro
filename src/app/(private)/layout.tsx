@@ -77,9 +77,10 @@ export default function PrivateLayout({
         aria-label="Navegación principal"
       >
         {/* Logo */}
-        <div className="flex h-16 items-center gap-2 border-b border-gray-800 px-4">
-          <Link href="/dashboard" onClick={() => setSidebarOpen(false)} aria-label="Ir al dashboard">
-            <Logo size={120} />
+        <div className="flex h-16 flex-shrink-0 items-center overflow-hidden border-b border-gray-800 px-4">
+          <Link href="/dashboard" onClick={() => setSidebarOpen(false)} aria-label="Ir al dashboard" className="flex items-center gap-2">
+            <Logo size={44} className="p-1" />
+            <span className="text-base font-bold text-gray-100">LivingShare</span>
           </Link>
         </div>
 

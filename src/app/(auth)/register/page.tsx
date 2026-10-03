@@ -86,7 +86,7 @@ export default function RegisterPage() {
     <main className="flex min-h-screen items-center justify-center bg-gray-950 px-4 py-12">
       <div className="w-full max-w-md rounded-2xl bg-gray-900 p-8 shadow-xl ring-1 ring-gray-800">
         <div className="mb-6 flex flex-col items-center text-center">
-          <Logo size={180} priority />
+          <Logo size={180} priority className="p-3" />
           <p className="mt-4 text-sm text-gray-400">Crea tu cuenta</p>
         </div>
 
