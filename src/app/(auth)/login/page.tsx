@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Logo from "@/components/ui/Logo";
 import { loginUser } from "@/lib/firebase/auth";
 import { loginSchema, type LoginInput } from "@/lib/validation/schemas";
 
@@ -56,12 +57,12 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-md">
-        {/* Logo / título */}
-        <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-indigo-600">LivingShare</h1>
-          <p className="mt-1 text-sm text-gray-500">
+    <main className="flex min-h-screen items-center justify-center bg-gray-950 px-4">
+      <div className="w-full max-w-md rounded-2xl bg-gray-900 p-8 shadow-xl ring-1 ring-gray-800">
+        {/* Logo */}
+        <div className="mb-6 flex flex-col items-center text-center">
+          <Logo size={180} priority />
+          <p className="mt-4 text-sm text-gray-400">
             Inicia sesión en tu cuenta
           </p>
         </div>
@@ -71,7 +72,7 @@ export default function LoginPage() {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-300"
             >
               Correo electrónico
             </label>
@@ -84,7 +85,7 @@ export default function LoginPage() {
               onChange={handleChange}
               aria-describedby={errors.email ? "email-error" : undefined}
               aria-invalid={!!errors.email}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm
+              className="mt-1 block w-full rounded-lg border border-gray-700 bg-gray-800 text-gray-100 px-3 py-2 text-sm shadow-sm
                          focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500
                          aria-[invalid=true]:border-red-400"
             />
@@ -99,7 +100,7 @@ export default function LoginPage() {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-300"
             >
               Contraseña
             </label>
@@ -112,7 +113,7 @@ export default function LoginPage() {
               onChange={handleChange}
               aria-describedby={errors.password ? "password-error" : undefined}
               aria-invalid={!!errors.password}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm
+              className="mt-1 block w-full rounded-lg border border-gray-700 bg-gray-800 text-gray-100 px-3 py-2 text-sm shadow-sm
                          focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500
                          aria-[invalid=true]:border-red-400"
             />
@@ -146,13 +147,13 @@ export default function LoginPage() {
         <div className="mt-4 flex flex-col gap-1 text-center text-sm">
           <Link
             href="/forgot-password"
-            className="text-gray-500 hover:text-indigo-600 hover:underline"
+            className="text-gray-400 hover:text-indigo-400 hover:underline"
           >
             ¿Olvidaste tu contraseña?
           </Link>
           <Link
             href="/register"
-            className="text-indigo-600 hover:underline"
+            className="text-indigo-400 hover:underline"
           >
             ¿No tienes cuenta? Regístrate
           </Link>

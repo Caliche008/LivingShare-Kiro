@@ -46,7 +46,7 @@ export default function DashboardSummary({
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 px-6 py-4 text-sm text-red-700">
+      <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-6 py-4 text-sm text-red-300">
         {error}
       </div>
     );
@@ -58,10 +58,10 @@ export default function DashboardSummary({
     <div className="space-y-8">
       {/* Saludo */}
       <div>
-        <h1 className="text-2xl font-semibold text-gray-900">
+        <h1 className="text-2xl font-semibold text-gray-100">
           Bienvenido{displayName ? `, ${displayName}` : ""}
         </h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-gray-400">
           Aquí tienes un resumen de tu actividad reciente.
         </p>
       </div>
@@ -73,7 +73,7 @@ export default function DashboardSummary({
           label="Facturas pendientes"
           value={pendingBills.length}
           href="/bills"
-          colorClass="bg-amber-50 text-amber-700"
+          colorClass="bg-amber-500/15 text-amber-300"
           emptyLabel="Al día"
         />
         <StatCard
@@ -81,7 +81,7 @@ export default function DashboardSummary({
           label="Propiedades"
           value={properties.length}
           href="/properties"
-          colorClass="bg-indigo-50 text-indigo-700"
+          colorClass="bg-indigo-500/15 text-indigo-300"
           emptyLabel="Sin propiedades"
         />
         <StatCard
@@ -89,7 +89,7 @@ export default function DashboardSummary({
           label="Habitaciones publicadas"
           value={publishedRooms.length}
           href="/rooms"
-          colorClass="bg-green-50 text-green-700"
+          colorClass="bg-green-500/15 text-green-300"
           emptyLabel="Sin habitaciones"
         />
         <StatCard
@@ -97,7 +97,7 @@ export default function DashboardSummary({
           label="Pagos realizados"
           value={recentPayments.filter((p) => p.status === "paid").length}
           href="/bills"
-          colorClass="bg-emerald-50 text-emerald-700"
+          colorClass="bg-emerald-500/15 text-emerald-300"
           emptyLabel="Sin pagos"
         />
       </div>
@@ -110,7 +110,7 @@ export default function DashboardSummary({
         empty={pendingBills.length === 0}
         emptyMessage="No tienes facturas pendientes."
       >
-        <ul className="divide-y rounded-xl border bg-white" role="list">
+        <ul className="divide-y divide-gray-800 rounded-xl border border-gray-800 bg-gray-900" role="list">
           {pendingBills.slice(0, 4).map((bill) => (
             <BillRow key={bill.id} bill={bill} />
           ))}
@@ -141,7 +141,7 @@ export default function DashboardSummary({
           linkLabel="Ver historial"
           empty={false}
         >
-          <ul className="divide-y rounded-xl border bg-white" role="list">
+          <ul className="divide-y divide-gray-800 rounded-xl border border-gray-800 bg-gray-900" role="list">
             {recentPayments.slice(0, 4).map((payment) => (
               <PaymentRow key={payment.id} payment={payment} />
             ))}
@@ -213,7 +213,7 @@ function StatCard({
   return (
     <Link
       href={href}
-      className="flex items-center gap-4 rounded-xl bg-white p-5 shadow-sm
+      className="flex items-center gap-4 rounded-xl bg-gray-900 ring-1 ring-gray-800 p-5 shadow-sm
                  hover:shadow-md transition-shadow focus-visible:outline-none
                  focus-visible:ring-2 focus-visible:ring-indigo-500"
     >
@@ -221,8 +221,8 @@ function StatCard({
         {icon}
       </div>
       <div>
-        <p className="text-2xl font-bold text-gray-900">{value}</p>
-        <p className="text-xs text-gray-500">
+        <p className="text-2xl font-bold text-gray-100">{value}</p>
+        <p className="text-xs text-gray-400">
           {value === 0 ? emptyLabel : label}
         </p>
       </div>
@@ -250,21 +250,21 @@ function Section({
       <div className="mb-3 flex items-center justify-between">
         <h2
           id={`section-${title}`}
-          className="text-base font-semibold text-gray-800"
+          className="text-base font-semibold text-gray-200"
         >
           {title}
         </h2>
         <Link
           href={href}
-          className="text-sm text-indigo-600 hover:underline focus-visible:outline-none
+          className="text-sm text-indigo-400 hover:underline focus-visible:outline-none
                      focus-visible:ring-2 focus-visible:ring-indigo-500 rounded"
         >
           {linkLabel} →
         </Link>
       </div>
       {empty ? (
-        <p className="rounded-xl border border-dashed bg-white px-6 py-8 text-center
-                      text-sm text-gray-500">
+        <p className="rounded-xl border border-dashed border-gray-700 bg-gray-900 px-6 py-8 text-center
+                      text-sm text-gray-400">
           {emptyMessage}
         </p>
       ) : (
@@ -285,13 +285,13 @@ function BillRow({ bill }: { bill: Bill }) {
     <li>
       <Link
         href={`/bills/${bill.id}`}
-        className="flex items-center justify-between px-4 py-3 hover:bg-gray-50
+        className="flex items-center justify-between px-4 py-3 hover:bg-gray-800
                    focus-visible:outline-none focus-visible:ring-2
                    focus-visible:ring-inset focus-visible:ring-indigo-500"
       >
         <div>
-          <p className="text-sm font-medium text-gray-800">{bill.serviceType}</p>
-          <p className="text-xs text-gray-500">
+          <p className="text-sm font-medium text-gray-100">{bill.serviceType}</p>
+          <p className="text-xs text-gray-400">
             Vence: {bill.dueDate}
             {isOverdue && (
               <span className="ml-2 font-medium text-red-600">Vencida</span>
@@ -315,11 +315,11 @@ function RoomCard({ room }: { room: Room }) {
   return (
     <Link
       href={`/properties/${room.propertyId}`}
-      className="rounded-xl border bg-white p-4 hover:shadow-md transition-shadow
+      className="rounded-xl border border-gray-800 bg-gray-900 p-4 hover:shadow-md transition-shadow
                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
     >
-      <p className="text-sm font-medium text-gray-800 truncate">{room.title}</p>
-      <p className="mt-1 text-xs text-gray-500">
+      <p className="text-sm font-medium text-gray-100 truncate">{room.title}</p>
+      <p className="mt-1 text-xs text-gray-400">
         {price} / mes
       </p>
       <span className="mt-2 inline-flex items-center rounded-full bg-green-100
@@ -350,8 +350,8 @@ function PaymentRow({ payment }: { payment: Payment }) {
   return (
     <li className="flex items-center justify-between px-4 py-3">
       <div>
-        <p className="text-sm font-medium text-gray-800">{amount}</p>
-        <p className="text-xs text-gray-500">{payment.currency.toUpperCase()}</p>
+        <p className="text-sm font-medium text-gray-100">{amount}</p>
+        <p className="text-xs text-gray-400">{payment.currency.toUpperCase()}</p>
       </div>
       <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${className}`}>
         {label}
@@ -372,7 +372,7 @@ function QuickActions() {
     <section aria-labelledby="quick-actions-title">
       <h2
         id="quick-actions-title"
-        className="mb-3 text-base font-semibold text-gray-800"
+        className="mb-3 text-base font-semibold text-gray-200"
       >
         Acciones rápidas
       </h2>
@@ -381,12 +381,12 @@ function QuickActions() {
           <Link
             key={href}
             href={href}
-            className="flex items-center gap-3 rounded-xl border bg-white p-4
+            className="flex items-center gap-3 rounded-xl border border-gray-800 bg-gray-900 p-4
                        hover:shadow-md transition-shadow focus-visible:outline-none
                        focus-visible:ring-2 focus-visible:ring-indigo-500"
           >
             <span className="text-2xl" aria-hidden="true">{icon}</span>
-            <span className="text-sm font-medium text-gray-700">{label}</span>
+            <span className="text-sm font-medium text-gray-200">{label}</span>
           </Link>
         ))}
       </div>
@@ -398,17 +398,17 @@ function DashboardSkeleton() {
   return (
     <div className="space-y-8 animate-pulse">
       <div>
-        <div className="h-7 w-48 rounded-lg bg-gray-200" />
-        <div className="mt-2 h-4 w-64 rounded bg-gray-100" />
+        <div className="h-7 w-48 rounded-lg bg-gray-800" />
+        <div className="mt-2 h-4 w-64 rounded bg-gray-800" />
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-24 rounded-xl bg-gray-200" />
+          <div key={i} className="h-24 rounded-xl bg-gray-800" />
         ))}
       </div>
       <div>
-        <div className="mb-3 h-5 w-36 rounded bg-gray-200" />
-        <div className="h-40 rounded-xl bg-gray-200" />
+        <div className="mb-3 h-5 w-36 rounded bg-gray-800" />
+        <div className="h-40 rounded-xl bg-gray-800" />
       </div>
     </div>
   );

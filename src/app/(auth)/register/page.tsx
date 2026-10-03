@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Logo from "@/components/ui/Logo";
 import { registerUser } from "@/lib/firebase/auth";
 import { registerSchema, type RegisterInput } from "@/lib/validation/schemas";
 
@@ -82,11 +83,11 @@ export default function RegisterPage() {
   ];
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-md">
-        <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-indigo-600">LivingShare</h1>
-          <p className="mt-1 text-sm text-gray-500">Crea tu cuenta</p>
+    <main className="flex min-h-screen items-center justify-center bg-gray-950 px-4 py-12">
+      <div className="w-full max-w-md rounded-2xl bg-gray-900 p-8 shadow-xl ring-1 ring-gray-800">
+        <div className="mb-6 flex flex-col items-center text-center">
+          <Logo size={180} priority />
+          <p className="mt-4 text-sm text-gray-400">Crea tu cuenta</p>
         </div>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
@@ -94,7 +95,7 @@ export default function RegisterPage() {
             <div key={id}>
               <label
                 htmlFor={id}
-                className="block text-sm font-medium text-gray-700"
+                className="block text-sm font-medium text-gray-300"
               >
                 {label}
               </label>
@@ -107,7 +108,7 @@ export default function RegisterPage() {
                 onChange={handleChange}
                 aria-describedby={errors[id] ? `${id}-error` : undefined}
                 aria-invalid={!!errors[id]}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm
+                className="mt-1 block w-full rounded-lg border border-gray-700 bg-gray-800 text-gray-100 px-3 py-2 text-sm shadow-sm
                            focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500
                            aria-[invalid=true]:border-red-400"
               />
@@ -137,7 +138,7 @@ export default function RegisterPage() {
         </form>
 
         <div className="mt-4 text-center text-sm">
-          <Link href="/login" className="text-indigo-600 hover:underline">
+          <Link href="/login" className="text-indigo-400 hover:underline">
             ¿Ya tienes cuenta? Inicia sesión
           </Link>
         </div>

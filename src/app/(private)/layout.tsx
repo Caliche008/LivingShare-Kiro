@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/firebase/AuthContext";
 import { logoutUser } from "@/lib/firebase/auth";
 import NotificationBell from "@/components/ui/NotificationBell";
+import Logo from "@/components/ui/Logo";
 
 // ─── Definición de la navegación ─────────────────────────────────────────────
 
@@ -40,7 +41,7 @@ export default function PrivateLayout({
   // Pantalla de carga inicial
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="flex min-h-screen items-center justify-center bg-gray-950">
         <div className="h-9 w-9 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
       </div>
     );
@@ -55,7 +56,7 @@ export default function PrivateLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-950">
       {/* ── Overlay para cerrar sidebar en móvil ── */}
       {sidebarOpen && (
         <div
@@ -68,7 +69,7 @@ export default function PrivateLayout({
       {/* ── Sidebar ── */}
       <aside
         className={[
-          "fixed inset-y-0 left-0 z-30 flex w-64 flex-col bg-white shadow-md",
+          "fixed inset-y-0 left-0 z-30 flex w-64 flex-col bg-gray-900 shadow-md ring-1 ring-gray-800",
           "transition-transform duration-200 ease-in-out",
           "lg:static lg:translate-x-0",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
@@ -76,8 +77,10 @@ export default function PrivateLayout({
         aria-label="Navegación principal"
       >
         {/* Logo */}
-        <div className="flex h-16 items-center gap-2 border-b px-6">
-          <span className="text-xl font-bold text-indigo-600">LivingShare</span>
+        <div className="flex h-16 items-center gap-2 border-b border-gray-800 px-4">
+          <Link href="/dashboard" onClick={() => setSidebarOpen(false)} aria-label="Ir al dashboard">
+            <Logo size={120} />
+          </Link>
         </div>
 
         {/* Links de navegación */}
@@ -95,8 +98,8 @@ export default function PrivateLayout({
                       "transition-colors focus-visible:outline-none focus-visible:ring-2",
                       "focus-visible:ring-indigo-500",
                       isActive
-                        ? "bg-indigo-50 text-indigo-700"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                        ? "bg-indigo-500/15 text-indigo-300"
+                        : "text-gray-300 hover:bg-gray-800 hover:text-white",
                     ].join(" ")}
                     aria-current={isActive ? "page" : undefined}
                   >
@@ -112,32 +115,32 @@ export default function PrivateLayout({
         </nav>
 
         {/* Perfil + cierre de sesión */}
-        <div className="border-t p-4">
+        <div className="border-t border-gray-800 p-4">
           <Link
             href="/profile"
             onClick={() => setSidebarOpen(false)}
             className="mb-3 flex items-center gap-3 rounded-lg px-2 py-1.5
-                       hover:bg-gray-50 focus-visible:outline-none
+                       hover:bg-gray-800 focus-visible:outline-none
                        focus-visible:ring-2 focus-visible:ring-indigo-500"
             aria-label="Ver perfil de usuario"
           >
             <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center
-                            rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700">
+                            rounded-full bg-indigo-500/20 text-sm font-semibold text-indigo-300">
               {profile?.displayName?.[0]?.toUpperCase() ?? "U"}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-gray-800">
+              <p className="truncate text-sm font-medium text-gray-100">
                 {profile?.displayName ?? "Usuario"}
               </p>
-              <p className="truncate text-xs text-gray-500">
+              <p className="truncate text-xs text-gray-400">
                 {profile?.email ?? user.email ?? ""}
               </p>
             </div>
           </Link>
           <button
             onClick={handleLogout}
-            className="w-full rounded-lg border border-gray-200 py-1.5 text-sm
-                       text-gray-600 hover:bg-gray-50 hover:text-gray-900
+            className="w-full rounded-lg border border-gray-700 py-1.5 text-sm
+                       text-gray-300 hover:bg-gray-800 hover:text-white
                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
           >
             Cerrar sesión
@@ -149,11 +152,11 @@ export default function PrivateLayout({
       <div className="flex flex-1 flex-col min-w-0">
         {/* Navbar superior */}
         <header className="sticky top-0 z-10 flex h-16 items-center justify-between
-                           border-b bg-white px-4 shadow-sm">
+                           border-b border-gray-800 bg-gray-900 px-4 shadow-sm">
           {/* Botón hamburguesa (solo móvil) */}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="rounded-lg p-2 text-gray-500 hover:bg-gray-100
+            className="rounded-lg p-2 text-gray-400 hover:bg-gray-800
                        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500
                        lg:hidden"
             aria-label="Abrir menú de navegación"
@@ -176,7 +179,7 @@ export default function PrivateLayout({
           </button>
 
           {/* Título de la página activa */}
-          <span className="hidden text-sm font-medium text-gray-600 lg:block">
+          <span className="hidden text-sm font-medium text-gray-300 lg:block">
             {NAV_ITEMS.find((n) => pathname === n.href || pathname.startsWith(n.href + "/"))
               ?.label ?? "LivingShare"}
           </span>
