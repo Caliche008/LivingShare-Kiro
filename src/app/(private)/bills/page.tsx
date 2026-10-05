@@ -6,7 +6,6 @@ import ProtectedRoute from "@/components/ui/ProtectedRoute";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import EmptyState from "@/components/ui/EmptyState";
 import ErrorMessage from "@/components/ui/ErrorMessage";
-import { useAuth } from "@/lib/firebase/AuthContext";
 import { getBillsByProperty } from "@/lib/firebase/billsService";
 import { formatCents } from "@/lib/domain/billSplit";
 import type { Bill, BillStatus } from "@/types";
@@ -28,7 +27,6 @@ const STATUS_STYLES: Record<BillStatus, string> = {
 // ─── Componente ───────────────────────────────────────────────────────────────
 
 export default function BillsPage() {
-  const { profile } = useAuth();
   const router = useRouter();
 
   // Para simplificar, usamos la primera propiedad del usuario si es owner/admin.
@@ -69,9 +67,6 @@ export default function BillsPage() {
 
   const filtered = filter === "all" ? bills : bills.filter((b) => b.status === filter);
 
-  const isManager =
-    profile?.roles?.includes("owner") || profile?.roles?.includes("admin");
-
   return (
     <ProtectedRoute>
       <main className="min-h-screen bg-gray-50">
@@ -84,7 +79,7 @@ export default function BillsPage() {
               </a>
               <h1 className="text-xl font-bold text-gray-900">Facturas</h1>
             </div>
-            {isManager && propertyId && (
+            {propertyId && (
               <button
                 onClick={() => router.push(`/bills/new?propertyId=${propertyId}`)}
                 className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white
@@ -146,13 +141,13 @@ export default function BillsPage() {
                       : `No hay facturas ${STATUS_LABELS[filter as BillStatus].toLowerCase()}`
                   }
                   description={
-                    filter === "all" && isManager
+                    filter === "all"
                       ? "Registra la primera factura de la propiedad."
                       : undefined
                   }
-                  actionLabel={filter === "all" && isManager ? "Nueva factura" : undefined}
+                  actionLabel={filter === "all" ? "Nueva factura" : undefined}
                   onAction={
-                    filter === "all" && isManager
+                    filter === "all"
                       ? () => router.push(`/bills/new?propertyId=${propertyId}`)
                       : undefined
                   }
