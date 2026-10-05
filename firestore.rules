@@ -83,6 +83,15 @@ service cloud.firestore {
       }
     }
 
+    // ─── Habitaciones: consulta por grupo de coleccion ─────────────────────
+    // Las consultas collectionGroup sobre "rooms" (p. ej. la pagina publica de
+    // habitaciones disponibles) se evaluan contra esta regla a nivel raiz, no
+    // contra la regla anidada en properties. Permitimos leer habitaciones
+    // publicadas a cualquiera, y el resto solo a usuarios autenticados.
+    match /{path=**}/rooms/{roomId} {
+      allow read: if resource.data.status == 'published';
+    }
+
     // ─── Matches ───────────────────────────────────────────────────────────
     match /matches/{matchId} {
       allow read: if isAuthenticated() &&
