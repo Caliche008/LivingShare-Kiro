@@ -196,17 +196,27 @@ export function subscribeToNotifications(
     limit(pageSize)
   );
 
-  return onSnapshot(q, (snap) => {
-    const notifs = snap.docs.map(
-      (d) => ({ id: d.id, ...d.data() }) as Notification
-    );
-    // No leídas primero, luego por fecha
-    notifs.sort((a, b) => {
-      if (a.read !== b.read) return a.read ? 1 : -1;
-      return 0;
-    });
-    onUpdate(notifs);
-  });
+  return onSnapshot(
+    q,
+    (snap) => {
+      const notifs = snap.docs.map(
+        (d) => ({ id: d.id, ...d.data() }) as Notification
+      );
+      // No leídas primero, luego por fecha
+      notifs.sort((a, b) => {
+        if (a.read !== b.read) return a.read ? 1 : -1;
+        return 0;
+      });
+      onUpdate(notifs);
+    },
+    (error) => {
+      // No propagar el error: si la consulta falla (p. ej. un índice de
+      // Firestore que aún se esta construyendo), mostramos la lista vacía en
+      // lugar de tumbar toda el area privada que envuelve este componente.
+      console.warn("subscribeToNotifications: no se pudieron cargar notificaciones", error);
+      onUpdate([]);
+    }
+  );
 }
 
 // ─── Marcar como leída ────────────────────────────────────────────────────────
