@@ -29,17 +29,23 @@ export default function NewBillPage() {
     try {
       let attachmentPath: string | undefined;
 
-      // Subir adjunto si existe
+      // Subir adjunto si existe. Si Storage no está disponible (p. ej. no
+      // activado en el proyecto), no bloqueamos la creación de la factura:
+      // se guarda sin adjunto y se avisa.
       if (attachmentFile) {
-        const { getFirebaseStorage } = await import("@/lib/firebase/config");
-        const { ref, uploadBytes, getDownloadURL } = await import("firebase/storage");
-        const storage = getFirebaseStorage();
-        const storageRef = ref(
-          storage,
-          `bills/${propertyId}/${Date.now()}_${attachmentFile.name}`
-        );
-        await uploadBytes(storageRef, attachmentFile);
-        attachmentPath = await getDownloadURL(storageRef);
+        try {
+          const { getFirebaseStorage } = await import("@/lib/firebase/config");
+          const { ref, uploadBytes, getDownloadURL } = await import("firebase/storage");
+          const storage = getFirebaseStorage();
+          const storageRef = ref(
+            storage,
+            `bills/${propertyId}/${Date.now()}_${attachmentFile.name}`
+          );
+          await uploadBytes(storageRef, attachmentFile);
+          attachmentPath = await getDownloadURL(storageRef);
+        } catch (uploadErr) {
+          console.warn("No se pudo subir el comprobante; se guarda la factura sin adjunto", uploadErr);
+        }
       }
 
       const bill = await createBill(propertyId, user.uid, data, attachmentPath);
