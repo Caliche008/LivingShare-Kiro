@@ -113,8 +113,10 @@ export async function getRoomsByProperty(propertyId: string): Promise<Room[]> {
  * Usa collectionGroup para buscar en todas las propiedades a la vez.
  */
 export async function getPublishedRooms(filters?: RoomFilters): Promise<Room[]> {
-  const roomsGroup = collection(db, "rooms");
-  // collectionGroup requiere un índice en Firestore. Usamos query simple por ahora.
+  // Las habitaciones son subcoleccion de properties/{id}/rooms, por lo que hay
+  // que usar collectionGroup para buscarlas en todas las propiedades a la vez.
+  // Requiere el indice collectionGroup (status + priceCents) de firestore.indexes.json.
+  const roomsGroup = collectionGroup(db, "rooms");
   const q = query(
     roomsGroup,
     where("status", "==", "published"),
