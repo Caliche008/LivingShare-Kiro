@@ -29,7 +29,7 @@ service cloud.firestore {
       let property = getPropertyData(propertyId);
       return isAuthenticated() &&
         (request.auth.uid == property.ownerId ||
-         request.auth.uid in property.managerIds);
+         (property.managerIds is list && request.auth.uid in property.managerIds));
     }
 
     function isPropertyResident(propertyId) {

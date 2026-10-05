@@ -65,6 +65,12 @@ export default function PropertyDetailPage() {
                   Editar
                 </button>
                 <button
+                  onClick={() => router.push(`/bills?propertyId=${propertyId}`)}
+                  className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50"
+                >
+                  Facturas
+                </button>
+                <button
                   onClick={() => router.push(`/properties/${propertyId}/rooms/new`)}
                   className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-700"
                 >
