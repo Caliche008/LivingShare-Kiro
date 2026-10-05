@@ -87,9 +87,16 @@ export async function submitQuestionnaire(
     updatedAt: serverTimestamp(),
   });
 
-  // Marcar perfil como 'submitted'
-  await updateDoc(doc(db, "users", userId), {
-    questionnaireStatus: "submitted",
-    updatedAt: serverTimestamp(),
-  });
+  // Marcar perfil como 'submitted'.
+  // Usamos setDoc con merge en lugar de updateDoc: si el documento de usuario
+  // no existe todavia (cuentas creadas antes de que se guardara el perfil),
+  // updateDoc fallaria con "No document to update". merge lo crea o actualiza.
+  await setDoc(
+    doc(db, "users", userId),
+    {
+      questionnaireStatus: "submitted",
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true }
+  );
 }
