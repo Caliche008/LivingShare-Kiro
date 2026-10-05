@@ -63,7 +63,12 @@ service cloud.firestore {
     // ─── Propiedades ───────────────────────────────────────────────────────
     match /properties/{propertyId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && hasRole('owner');
+      // Un usuario autenticado puede crear una propiedad siempre que se registre
+      // a si mismo como ownerId (se convierte en duenno de lo que crea), o si ya
+      // tiene el rol 'owner'. Esto evita bloquear el flujo cuando el usuario aun
+      // no tiene roles asignados por una Cloud Function.
+      allow create: if isAuthenticated() &&
+        (request.resource.data.ownerId == request.auth.uid || hasRole('owner'));
       allow update: if isPropertyManager(propertyId);
       allow delete: if false;
 
