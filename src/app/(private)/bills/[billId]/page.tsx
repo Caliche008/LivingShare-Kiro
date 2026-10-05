@@ -43,7 +43,7 @@ export default function BillDetailPage() {
   const [splitLoading, setSplitLoading] = useState(false);
 
   const isManager =
-    profile?.roles.includes("owner") || profile?.roles.includes("admin");
+    profile?.roles?.includes("owner") || profile?.roles?.includes("admin");
 
   const load = useCallback(async () => {
     if (!user) return;

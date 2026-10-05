@@ -70,7 +70,7 @@ export default function BillsPage() {
   const filtered = filter === "all" ? bills : bills.filter((b) => b.status === filter);
 
   const isManager =
-    profile?.roles.includes("owner") || profile?.roles.includes("admin");
+    profile?.roles?.includes("owner") || profile?.roles?.includes("admin");
 
   return (
     <ProtectedRoute>
